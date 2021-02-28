@@ -38,7 +38,7 @@ model.layers[2].set_weights([np.transpose(l2),l2b])
 img=np.expand_dims(input,axis=(0,3))
 
 #print needed values.
-np.set_printoptions(precision=5)
+np.set_printoptions(precision=7)
 print("-------------------------------------------")
 print("-------------------------------------------")
 print("		EXAMPLE 1                   ")
@@ -47,9 +47,21 @@ print("-------------------------------------------")
 
 print('model output before:')
 print(model.predict(img))
-sgd = optimizers.SGD(lr=100)
+
+print('1st convolutional layer, 1st kernel weights:')
+print(np.squeeze(model.get_weights()[0][:,:,0,0]))
+print('1st convolutional layer, 1st kernel bias:')
+print(np.squeeze(model.get_weights()[1][0]))
+
+print('fully connected layer weights:')
+print(np.squeeze(model.get_weights()[2]))
+print('fully connected layer bias:')
+print(np.squeeze(model.get_weights()[3][0]))
+
+
+sgd = optimizers.SGD(lr=1)
 model.compile(loss='MSE', optimizer=sgd, metrics=['accuracy'])
-history=model.fit(img,output,batch_size=1,epochs=1)
+history=model.fit(img,output,batch_size=10,epochs=100)
 print('model output after:')
 print(model.predict(img))
 
