@@ -8,6 +8,9 @@ from parameters import *
 # -------------------------------------------------------------------------------
 # 							EXAMPLE 2
 # -------------------------------------------------------------------------------
+# this example has an input of 7x7, one 3x3 convolution layer
+# with two kernels, another 3x3 convolution layer with a single kernel
+# a flatten layer and a single neuron for the output
 
 #Create a feed forward network
 model=Sequential()
@@ -30,7 +33,7 @@ l1k1=l1k1.reshape(3,3,1,1)   				# kernel_size, kernel_size, num_channels, num_k
 l1k2=l1k2.reshape(3,3,1,1)
 
 w1=np.concatenate((l1k1,l1k2),axis=3)		# concatenate on the third axis (num_kernel)
-model.layers[0].set_weights([w1,np.array([l1b1[0],l1b2[0]])]) #Shape of weight matrix is (w,h,input_channels,kernels)
+model.layers[0].set_weights([w1, np.array( [l1b1[0],l1b2[0]] ) ]) #Shape of weight matrix is (w,h,input_channels,kernels)
 
 
 #setting weights and bias of second layer.
@@ -38,13 +41,14 @@ l2c1=l2c1.reshape(3,3,1,1)
 l2c2=l2c2.reshape(3,3,1,1)
 
 w1=np.concatenate((l2c1,l2c2),axis=2)
+print("weights for two kernels: ", w1.shape)
 model.layers[1].set_weights([w1,l2b])
 
 #setting weights and bias of fully connected layer.
 model.layers[3].set_weights([np.transpose(l3),l3b])
 
-#Setting input. Tensor flow is expecting a 4d array 
-#since the first dimension is the batch size (here we set it to one), 
+# Setting input. Tensor flow is expecting a 4d array 
+# since the first dimension is the batch size (here we set it to one), 
 # and third dimension is channels
 img=np.expand_dims(input,axis=(0,3))
 
@@ -57,10 +61,33 @@ print("-------------------------------------------")
 print("-------------------------------------------")
 
 print('model output before:')
+# print(output)
 print(model.predict(img))
-sgd = optimizers.SGD(lr=100)
+
+# print('1st convolutional layer, 1st kernel weights:')
+# print(np.squeeze(model.get_weights()[0][:,:,0,0]))
+# print('1st convolutional layer, 1st kernel bias:')
+# print(np.squeeze(model.get_weights()[1][0]))
+
+# print('1st convolutional layer, 2nd kernel weights:')
+# print(np.squeeze(model.get_weights()[0][:,:,0,1]))
+# print('1st convolutional layer, 2nd kernel bias:')
+# print(np.squeeze(model.get_weights()[1][1]))
+
+# print('2nd convolutional layer weights:')
+# print(np.squeeze(model.get_weights()[2][:,:,0,0]))
+# print(np.squeeze(model.get_weights()[2][:,:,1,0]))
+# print('2nd convolutional layer bias:')
+# print(np.squeeze(model.get_weights()[3]))
+
+# print('fully connected layer weights:')
+# print(np.squeeze(model.get_weights()[4]))
+# print('fully connected layer bias:')
+# print(np.squeeze(model.get_weights()[5]))
+
+sgd = optimizers.SGD(lr=1)
 model.compile(loss='MSE', optimizer=sgd, metrics=['accuracy'])
-history=model.fit(img,output,batch_size=1,epochs=50)
+history=model.fit(img,output,batch_size=1,epochs=1)
 print('model output after:')
 print(model.predict(img))
 
@@ -84,4 +111,7 @@ print('fully connected layer weights:')
 print(np.squeeze(model.get_weights()[4]))
 print('fully connected layer bias:')
 print(np.squeeze(model.get_weights()[5]))
+
+
+
 

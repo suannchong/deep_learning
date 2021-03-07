@@ -60,6 +60,7 @@ def generateExample1():
     input = np.random.rand(5,5)
     output = np.random.rand(1)
 
+    # print("expected output: ", output)
     return l1, l1b, l2, l2b, input, output 
 
 def generateExample3():

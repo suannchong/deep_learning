@@ -24,6 +24,8 @@ model.add(layers.Dense(1, activation='sigmoid'))
 
 # call weight/data generating function
 l1, l1b, l2, l2b, input, output = generateExample1()
+print("example1 output before")
+print(output)
 
 # set weights to desired values
 
@@ -38,30 +40,42 @@ model.layers[2].set_weights([np.transpose(l2),l2b])
 img=np.expand_dims(input,axis=(0,3))
 
 #print needed values.
-np.set_printoptions(precision=7)
+np.set_printoptions(precision=5)
+
 print("-------------------------------------------")
 print("-------------------------------------------")
 print("		EXAMPLE 1                   ")
 print("-------------------------------------------")
 print("-------------------------------------------")
 
+# print("model input")
+# print(img)
+# print(img.shape)
+# print("1st convolutional layer, 1 kernel weight before")
+# print(l1)
+# print(l1b)
+# print("3rd dense layer before:")
+# print(l2)
+# print(l2b)
 print('model output before:')
+# print(output)
 print(model.predict(img))
 
-print('1st convolutional layer, 1st kernel weights:')
-print(np.squeeze(model.get_weights()[0][:,:,0,0]))
-print('1st convolutional layer, 1st kernel bias:')
-print(np.squeeze(model.get_weights()[1][0]))
+# print('1st convolutional layer, 1st kernel weights:')
+# print(np.squeeze(model.get_weights()[0][:,:,0,0]))
+# print('1st convolutional layer, 1st kernel bias:')
+# print(np.squeeze(model.get_weights()[1][0]))
 
-print('fully connected layer weights:')
-print(np.squeeze(model.get_weights()[2]))
-print('fully connected layer bias:')
-print(np.squeeze(model.get_weights()[3][0]))
+# print('fully connected layer weights:')
+# print(np.squeeze(model.get_weights()[2]))
+# print('fully connected layer bias:')
+# print(np.squeeze(model.get_weights()[3][0]))
 
 
 sgd = optimizers.SGD(lr=1)
+
 model.compile(loss='MSE', optimizer=sgd, metrics=['accuracy'])
-history=model.fit(img,output,batch_size=10,epochs=100)
+history=model.fit(img,output,batch_size=1,epochs=1)
 print('model output after:')
 print(model.predict(img))
 
