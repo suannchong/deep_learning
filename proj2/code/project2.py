@@ -40,11 +40,7 @@ class Neuron:
     # output for back-propagation.   
     def calculate(self,input):
         self.input = input
-
-        # print("conv neuron input: ", self.input.shape)
-        # print("conv neuron weights: ", self.weights.shape)
         self.net = np.matmul(self.input,self.weights)
-        # print("conv net: ", self.net)
         self.output = self.activate(self.net)
 
         return self.output
@@ -63,14 +59,9 @@ class Neuron:
     #and returns the delta*w to be used in the previous layer
     def calcpartialderivative(self, wtimesdelta):
 
-        # print("neuron wtimesdelta.shape: ", wtimesdelta)
         delta = np.array(wtimesdelta*self.activationderivative())
-        # print("neuron delta: ", delta)
         self.dEdw = delta*self.input
-        # print("neuron input: ", self.input)
-        # print("neuron dEdw: ", self.dEdw.shape)
         wtimesdeltas = delta*self.weights
-        # print("neuron wtimesdeltas.shape: ", wtimesdeltas.shape)
 
         return wtimesdeltas, self.dEdw
     
@@ -96,16 +87,12 @@ class ConvolutionalLayer:
         self.stride     = 1                         # assume stride = 1
         self.offset     = 0                         # assume padding = 'valid'
         self.weights    = weights
-        # self.bias       = np.zeros(len(weights))
         
         # if no weights given, randomly initialize the weights 
         # weights shape = (k, 2) where [k][0] is the weights (kw, kh, c), [k][1] is the bias 
         if weights is None:
             self.weights = np.array([[np.random.rand(self.kernel_size, self.kernel_size, self.input_size[2]), np.random.rand(1)] 
                 for i in range(self.num_kernels)], dtype=object)
-        #     print("conv2d non weights: ", self.weights.shape)
-
-        # print("conv2d weights, num_kernels: ", self.weights.shape, self.num_kernels)
 
         # calculate the number of neurons in the layer 
         ow   = int((self.input_size[0]- self.kernel_size)/self.stride + 1)
@@ -127,18 +114,11 @@ class ConvolutionalLayer:
         for k in range(self.num_kernels):
             for ow in range(self.output_size[0]):
                 for oh in range(self.output_size[1]):
-                    # print(k,ow,oh)
-                    # self.bias.append(weights[k][1])
                     # shared weights for neurons in all channels for each kernel: kw * kh * c + 1 
                     neuron_shared_weights = np.append(weights[k][0].flatten(), weights[k][1])
-                    # print("neuron_shared_weights: ", neuron_shared_weights.shape)
                     self.neuron_input_num = neuron_shared_weights.shape[0]
-                    # print("neuron_input_num: ", self.neuron_input_num)     
 
                     self.Neurons[ow,oh,k] = Neuron(self.activation, self.neuron_input_num, self.lr, neuron_shared_weights)
-            # print('next kernel')
-        
-        # print("self.Neurons.shape: ", self.Neurons.shape)
 
     # calculate the output of all the neurons in the layer and 
     # return a vector with those values (go through the neurons 
@@ -156,12 +136,8 @@ class ConvolutionalLayer:
                     if (w + self.kernel_size) <= self.input_size[0] and (h + self.kernel_size) <= self.input_size[1]:
                         neuron_input = self.input[w:w+self.kernel_size, h:h+self.kernel_size,:].flatten()
                         neuron_input = np.append(neuron_input, 1)
-                        # print(w,h,c)
-                        # print('conv neuron_input: ', neuron_input.shape)
                         self.output[w,h,c] = self.Neurons[w,h,c].calculate(neuron_input)
-            # print("next kernel")
 
-        # print("conv2d output: ", self.output)
         return self.output 
             
     # given the next layer's w*delta, should run through the neurons 
@@ -169,32 +145,20 @@ class ConvolutionalLayer:
     # sum up its ownw*delta, and then update the weights s
     # (using the updateweight() method). I should return the sum of w*delta.          
     def calcwdeltas(self, wtimesdelta):
-        # wtimesdeltas = []
         # same dimension as the kernel size 
         wtimesdeltas = np.zeros(self.input_size)  
-        # print("conv wtimesdeltas.shape : ", wtimesdeltas.shape)
-        # print("conv wtimesdelta.shape : ", wtimesdelta.shape)
-        # print("conv output_size.shape: ", self.output_size)
-        # print("conv kernel_size: ", self.kernel_size)
-
         dEdw = np.zeros(self.neuron_input_num)
-        # print("neuron input num: ", self.neuron_input_num)
 
         for oc in range(self.output_size[2]):
             for ow in range(self.output_size[0]):
                 for oh in range(self.output_size[1]):
 
                     # for each neuron in the layer, calculate the partial derivatice 
-                    # print(ow,oh,oc)
-                    # print("wtimesdelta[ow,oh,oc]: ", wtimesdelta[ow,oh,oc])
                     neuron_wtimesdelta, neuron_dEdw = self.Neurons[ow,oh,oc].calcpartialderivative(wtimesdelta[ow,oh,oc])
-                    # print("neuron_dEdw.shape: ", neuron_dEdw.shape)
                     dEdw += neuron_dEdw
-                    # print("neuron_wtimesdelta with bias: ", neuron_wtimesdelta.shape)
                     
                     # remove bias node and reshape the neuron_wtimesdelta to (c, kw, kh)
                     neuron_wtimesdelta = neuron_wtimesdelta[:-1].reshape(self.neuron_input_size)
-                    # print("neuron_wtimesdeltas.shape ", neuron_wtimesdelta.shape)
 
                     for c in range(neuron_wtimesdelta.shape[2]):
                         for kw in range(neuron_wtimesdelta.shape[0]):
@@ -202,7 +166,6 @@ class ConvolutionalLayer:
                                 if (ow + kw) <= self.input_size[0] and (oh + kh) <= self.input_size[1]: 
                                     wtimesdeltas[ow+kw,oh+kh,c] += neuron_wtimesdelta[kw,kh,c]
 
-        # print("total dEdw: ", dEdw)
         self.weights = []
         # sum all the dEdw from all output element-wise then update the weights
         for oc in range(self.output_size[2]):
@@ -211,10 +174,6 @@ class ConvolutionalLayer:
                     new_weights = self.Neurons[ow,oh,oc].updateweight(dEdw)
             self.weights.append([new_weights[:-1].reshape(self.kernel_size, self.kernel_size, self.input_size[2]), new_weights[-1]])
 
-        # self.bias = self.weights[-1]
-        # print("conv2d bias update: ", self.bias)
-        # self.weights = self.weights[:-1].reshape(self.num_kernels, self.kernel_size,self.kernel_size)
-        # print("conv2d weights update: ", self.weights)
         return wtimesdeltas 
 
 
@@ -228,43 +187,30 @@ class FullyConnected:
         self.input_size = input_size + 1        # input dimension (w,h) + bias
         self.lr         = lr
         self.weights    = weights 
-        # self.bias       = weights[0][-1]
         self.input      = 0
-
-        # print("dense input_size: ", self.input_size)
-        # print("dense output size: ", self.numOfNeurons)
 
         # assert self.weights.shape = (self.input_size,self.numOfNeurons)
 
         # randomly initialized weights if not given 
         if self.weights is None:
             self.weights = np.random.rand(self.numOfNeurons, self.input_size)
-        #     print("non dense self.weights.shape: ", self.weights.shape)
 
-        # print("dense self.weights.shape: ", self.weights.shape)
         self.Neurons = []
         for i in range(self.numOfNeurons):
-            # print("i=",i)
-            # print('weight[i].shape =', self.weights[i].shape)
             self.Neurons.append(Neuron(self.activation,self.input_size,self.lr,self.weights[i]))
 
         self.Neurons = np.array(self.Neurons, dtype=object)
 
-        # print("self.Neurons.shape: ", self.Neurons.shape)
-        
     #calculate the output of all the neurons in the layer and 
     # return a vector with those values (go through the neurons 
     # and call the calculate() method)      
     def calculate(self, input):
         self.input = np.append(input,1)
-        # print("dense input: ", self.input)
         results = []
         for neuron in self.Neurons:
             results.append(neuron.calculate(self.input))
         
-        # results.append(1)
         self.output = np.array(results).reshape(self.Neurons.shape)
-        # print("dense output: ", self.output)
         return self.output
             
     # given the next layer's w*delta, should run through the neurons 
@@ -273,15 +219,10 @@ class FullyConnected:
     # (using the updateweight() method). I should return the sum of w*delta.          
     def calcwdeltas(self, wtimesdelta):
         wtimesdeltas = []
-        # print("dense wtimesdelta: ", wtimesdelta.shape)
-        # print("dense numOfNeurons:", self.numOfNeurons)
 
         for i in range(self.numOfNeurons):
             wtimesdeltas.append(self.Neurons[i].calcpartialderivative(wtimesdelta[i])[0])
             self.weights = self.Neurons[i].updateweight()
-
-        # self.bias = self.weights[-1]
-        # self.weights = self.weights[:-1]
 
         return np.sum(wtimesdeltas,axis=0)[:-1]
 
@@ -302,8 +243,6 @@ class MaxPoolingLayer:
         h               = int((self.input_size[2]-self.kernel_size)/self.stride + 1)
         c               = self.input_size[0]
         self.output_size = c,w,h
-        # print("maxpooling input_size: ", self.input_size)
-        # print("maxpooling output_size: ", self.output_size)
         self.output     = np.zeros(self.output_size)
 
         # revert wtimesdelta from reduced size to original input size 
@@ -325,25 +264,17 @@ class MaxPoolingLayer:
                                 if pool[kw,kh] == largest:
                                     self.mask[c,w+kw,h+kh] = 1            # keep track of max position
 
-        # print("input dimension: self.input_size")                   
-        # print('output dimension: self.output.shape')
-
-
         return self.output
         
     # Given the ∑ w x ∂ from the next layer, return a new ∑ w x ∂
     # which is the size of the input and the values are set in the correct locations 
     def calcwdeltas(self,wtimesdelta):
-        # self.wtimesdeltas = np.zeros(self.input_size)
-        # print("maxpooling wtimesdelta from next: ", wtimesdelta.shape)
-        # print("maxpooling wtimesdeltas to prev: ", self.wtimesdeltas.shape)
 
         for c in range(self.input_size[0]):
             for w in range(self.input_size[1]):
                 for h in range(self.input_size[2]):
                     self.wtimesdeltas[c,w,h] = self.mask[c,w,h]*wtimesdelta[c, int(w/self.stride), int(h/self.stride)] 
 
-        # print(self.wtimesdeltas)
         return self.wtimesdeltas
 
 class FlattenLayer:
@@ -351,19 +282,17 @@ class FlattenLayer:
     def __init__(self, input_size):
         self.input_size = input_size    # dimension of input e.g. (w,h,c)
         self.output_size = input_size[0]*input_size[1]*input_size[2]
-        # print("flatten input size", self.input_size)
-        # print("flatten output size", self.output_size)
 
     # Given an input, simply resize it to create the output of the layer 
     def calculate(self,input):
-        # print("flatten input: ", input)
+
         return input.flatten()          # dimension of output e.g. (w*h*c) 
 
     # Given the ∑ w x ∂ from the next layer, simply resize it to the size of input
     def calcwdeltas(self, wtimesdelta):
-        # print("flatten wtimesdelta", wtimesdelta.shape)
+
         wtimesdeltas = wtimesdelta.reshape(self.input_size)
-        # print("flatten wtimesdeltas", wtimesdeltas.shape)
+
         return wtimesdeltas
         
 #An entire neural network        
@@ -417,7 +346,6 @@ class NeuralNetwork:
         for i in range(1,len(self.Layers)):
             results = self.Layers[i].calculate(results)
 
-        # return results[:-1]
         return results
 
         
@@ -490,32 +418,19 @@ if __name__=="__main__":
         # First layer: one 3x3 kernel, sigmoid 
         l1 = l1.reshape(3,3,1)   # (kw,kh,c)
         w1 = np.array([[l1,l1b]], dtype=object)       # weights dimension: (k, 2) where [k][0] = (kw, kh, c), k[1] = (1)
-        # print("l1, l1b: ", l1.shape, l1b.shape, weights.shape)
         model.addLayer(layer_type="Conv2D", numOfNeurons=None, num_kernels=1, kernel_size=3, 
                         activation=1, input_size=input_size, lr=lr, weights=w1)
-        # model.addLayer(layer_type="MaxPooling2D",kernel_size=1)
+
         # Flatten layer 
         model.addLayer(layer_type="Flatten")
+
         # Dense layer 
-        # print("l2: ")
-        # print(l2.flatten())
         w2 =  np.array([np.append(l2.flatten(),l2b)], dtype=object)
-        # print("w2: ",w2)
         model.addLayer(layer_type="Dense", numOfNeurons=1, activation=1, weights=w2)
 
 
         print("model output before: ")
         print(model.calculate(input))
-
-        # print('1st convolutional layer, 1st kernel weights:')
-        # print(model.Layers[0].weights[0][0][:,:,0])
-        # print('1st convolutional layer, 1st kernel bias:')
-        # print(model.Layers[0].weights[0][1][0])
-
-        # print('fully connected layer weights:')
-        # print(model.Layers[2].weights[0][:-1])
-        # print('fully connected layer bias:')
-        # print(model.Layers[2].weights[0][-1])
 
         # training the model
         model.train(input,output)
@@ -560,18 +475,6 @@ if __name__=="__main__":
         input = np.expand_dims(input,axis=2)  
         input_size  = input.shape
 
-        # print("model input: ")
-        # print(input)
-        # print("input.shape: ", input.shape)
-        # print("1st convolutional layer, 1 kernel weight before")
-        # print(l1)
-        # print(l1b)
-        # print("3rd dense layer before:")
-        # print(l2)
-        # print(l2b)
-        # print("model output before: ")
-        # print(output)
-
         # initialize a neural network 
         model = NeuralNetwork(input_size, loss, lr)
 
@@ -579,8 +482,6 @@ if __name__=="__main__":
         l1k1 = l1k1.reshape(3,3,1)   # (kw,kh,c)
         l1k2 = l1k2.reshape(3,3,1)   # (kw,kh,c)
         w1 = np.array([[l1k1,l1b1],[l1k2, l1b2]], dtype=object)       # weights dimension: (k, 2) where [k][0] = (kw, kh, c), k[1] = (1)
-        # print("w1 shape: ", w1.shape)
-        # print("l1, l1b: ", l1.shape, l1b.shape, weights.shape)
         model.addLayer(layer_type="Conv2D", numOfNeurons=None, num_kernels=2, kernel_size=3, 
                         activation=1, input_size=input_size, lr=lr, weights=w1)
         
@@ -588,44 +489,20 @@ if __name__=="__main__":
         l2c1 = l2c1.reshape(3,3,1)
         l2c2 = l2c2.reshape(3,3,1)
         l2   = np.concatenate((l2c1,l2c2),axis=2)
-        # print("l2: ", l2)
-        # print("l2 weights (2 channels): ", l2.shape)
         w2 = np.array([[l2, l2b]], dtype=object)
-        # print("w2 shape: ", w2.shape)
         model.addLayer(layer_type="Conv2D", numOfNeurons=None, num_kernels=1, kernel_size=3, 
                         activation=1, lr=lr, weights=w2)
         
         # Flatten layer 
         model.addLayer(layer_type="Flatten")
+
         # Dense layer 
-        w2 =  np.array([np.append(l3.flatten(),l3b)], dtype=object)
-        # print("w2: ",w2)
-        model.addLayer(layer_type="Dense", numOfNeurons=1, activation=1, weights=w2)
+        w3 =  np.array([np.append(l3.flatten(),l3b)], dtype=object)
+        model.addLayer(layer_type="Dense", numOfNeurons=1, activation=1, weights=w3)
 
 
         print("model output before: ")
         print(model.calculate(input))
-
-        # print('1st convolutional layer, 1st kernel weights:')
-        # print(model.Layers[0].weights[0][0][:,:,0])
-        # print('1st convolutional layer, 1st kernel bias:')
-        # print(model.Layers[0].weights[0][1][0])
-
-        # print('1st convolutional layer, 2nd kernel weights:')
-        # print(model.Layers[0].weights[1][0][:,:,0])
-        # print('1st convolutional layer, 2nd kernel bias:')
-        # print(model.Layers[0].weights[1][1][0])
-
-        # print('2nd convolutional layer weights:')
-        # print(model.Layers[1].weights[0][0][:,:,0])
-        # print(model.Layers[1].weights[0][0][:,:,1])
-        # print('2nd convolutional layer bias:')
-        # print(model.Layers[1].weights[0][1][0])
-
-        # print('fully connected layer weights:')
-        # print(model.Layers[3].weights[0][:-1])
-        # print('fully connected layer bias:')
-        # print(model.Layers[3].weights[0][-1])
 
         # training the model
         model.train(input,output)
@@ -671,7 +548,6 @@ if __name__=="__main__":
 
         # call weight/data generating function
         l1k1, l1k2, l1b1, l1b2, l2, l2b, input, output  = generateExample3()
-        # print(input)
         
         loss        = 0
         lr          = 1
@@ -687,8 +563,6 @@ if __name__=="__main__":
         l1k1 = l1k1.reshape(3,3,1)   # (kw,kh,c)
         l1k2 = l1k2.reshape(3,3,1)   # (kw,kh,c)
         w1 = np.array([[l1k1,l1b1],[l1k2, l1b2]], dtype=object)       # weights dimension: (k, 2) where [k][0] = (kw, kh, c), k[1] = (1)
-        # print("w1 shape: ", w1.shape)
-        # print("l1, l1b: ", l1.shape, l1b.shape, weights.shape)
         model.addLayer(layer_type="Conv2D", numOfNeurons=None, num_kernels=2, kernel_size=3, 
                         activation=1, input_size=input_size, lr=lr, weights=w1)
 
@@ -697,31 +571,13 @@ if __name__=="__main__":
 
         # Flatten layer 
         model.addLayer(layer_type="Flatten")
-        # Dense layer 
-        # print("l2: ")
-        # print(l2.flatten())
-        w2 =  np.array([np.append(l2.flatten(),l2b)], dtype=object)
-        # print("w2: ",w2)
-        model.addLayer(layer_type="Dense", numOfNeurons=1, activation=1, weights=w2)
 
+        # Dense layer 
+        w2 =  np.array([np.append(l2.flatten(),l2b)], dtype=object)
+        model.addLayer(layer_type="Dense", numOfNeurons=1, activation=1, weights=w2)
 
         print("model output before: ")
         print(model.calculate(input))
-
-        # print('1st convolutional layer, 1st kernel weights:')
-        # print(model.Layers[0].weights[0][0][:,:,0])
-        # print('1st convolutional layer, 1st kernel bias:')
-        # print(model.Layers[0].weights[0][1][0])
-
-        # print('1st convolutional layer, 2nd kernel weights:')
-        # print(model.Layers[0].weights[1][0][:,:,0])
-        # print('1st convolutional layer, 2nd kernel bias:')
-        # print(model.Layers[0].weights[1][1][0])
-
-        # print('fully connected layer weights:')
-        # print(model.Layers[3].weights[0][:-1])
-        # print('fully connected layer bias:')
-        # print(model.Layers[3].weights[0][-1])
 
         # training the model
         model.train(input,output)

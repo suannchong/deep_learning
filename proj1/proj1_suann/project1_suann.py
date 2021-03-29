@@ -38,7 +38,7 @@ class Neuron:
     def calculate(self,input):
 
         self.input = np.array(input) 
-        self.net = np.matmul(self.input,self.weights)
+        self.net = np.matmul(self.input,self.weights) 
         self.output = self.activate(self.net)
 
         return self.output
@@ -62,8 +62,9 @@ class Neuron:
 
         return wtimesdelta 
     
-    #Simply update the weights using the partial derivatives and 
+    # Simply update the weights using the partial derivatives and 
     # the learning weight
+    #  weights is in matrix form and add one element for bias 
     def updateweight(self):
         self.weights = self.weights - self.lr*self.dEdw
         
@@ -130,9 +131,9 @@ class NeuralNetwork:
                 self.weights.append(weight)
 
         self.Layers = []
-        for i in range(self.numOfLayers):
-            self.Layers.append(FullyConnected(self.numOfNeurons[i],self.activation[i],
-                self.inputSize[i],self.lr,self.weights[i]))
+        # for i in range(self.numOfLayers):
+        #     self.Layers.append(FullyConnected(self.numOfNeurons[i],self.activation[i],
+        #         self.inputSize[i],self.lr,self.weights[i]))
     
     #Given an input, calculate the output (using the layers calculate() method)
     def calculate(self,input):

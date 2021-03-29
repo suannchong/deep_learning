@@ -1,0 +1,48 @@
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras.models import Sequential
+from tensorflow.keras import layers, Input
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Reshape, Activation, Dropout
+from tensorflow.keras import optimizers
+
+import time 
+import pandas as pd
+import seaborn as sns; sns.set()
+import matplotlib.pyplot as plt 
+import numpy as np
+
+from matplotlib import image
+from sklearn.preprocessing import LabelEncoder
+
+label_tr = pd.read_csv("fairface_label_train.csv")
+label_te = pd.read_csv("fairface_label_val.csv")
+
+# Load image dataset 
+def load_img_dataset_with_label(df,label):
+    x = []
+    y = df[label].astype('category').cat.codes
+    for i in range(len(df)):
+        x.append(image.imread(df['file'][i]))
+    return np.array(x, dtype='float32'), np.array(y)
+    
+x_train_r, y_train_r = load_img_dataset_with_label(label_tr, "race")
+x_train_g, y_train_g = load_img_dataset_with_label(label_tr, "gender")
+
+x_test_r, y_test_r = load_img_dataset_with_label(label_te, "race")
+x_test_g, y_test_g = load_img_dataset_with_label(label_te, "gender")
+
+
+# Normalize using MinMax Scalar
+def MinMaxScaling(a):
+    return (a - a.min()) / (a.max() - a.min())
+
+xr_tr, xg_tr = MinMaxScaling(x_train_r), MinMaxScaling(x_train_g)
+xr_te, xg_te = MinMaxScaling(x_test_r), MinMaxScaling(x_test_g)
+
+# Label encoding
+encoder = LabelEncoder()
+encoder.fit(y_train_r)
+yr_tr, yg_tr = encoder.transform(y_train_r), encoder.transform(y_train_g)
+yr_te, yg_te = encoder.transform(y_test_r), encoder.transform(y_test_g)
+
+# Build the model 
