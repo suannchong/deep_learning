@@ -1,0 +1,159 @@
+\documentclass[12pt]{amsart}
+
+\addtolength{\hoffset}{-2.25cm}
+\addtolength{\textwidth}{4.5cm}
+\addtolength{\voffset}{-2.5cm}
+\addtolength{\textheight}{5cm}
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{15pt}
+
+\usepackage[export]{adjustbox}
+\usepackage{listings}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[colorlinks = true, linkcolor = black, citecolor = black, final]{hyperref}
+
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{ marvosym }
+\usepackage{wasysym}
+\usepackage{tikz}
+\usepackage{cite}
+\usetikzlibrary{patterns}
+
+\newcommand{\ds}{\displaystyle}
+\DeclareMathOperator{\sech}{sech}
+
+
+\setlength{\parindent}{0in}
+
+\pagestyle{empty}
+
+\begin{document}
+
+\thispagestyle{empty}
+
+{\hfill {\scshape \large Uncertainty Estimation in Time Series Prediction  \hfill} 
+
+\smallskip
+
+{\hfill {\scshape \large Using Bayesian Neural Network \hfill} 
+\smallskip 
+
+{ Su-Ann Chong} \hfill COSC 525: Final Project Proposal \hfill  {\scshape 2021-04-03}
+
+\smallskip
+
+\hrule
+
+\bigskip
+
+\section{Problem definition}
+
+The goal of this project to predict next-day stock prices with uncertainty estimations. 
+
+\bigskip
+\section{Motivation}
+% A short introduction to the problem 
+% Why is it interesting? 
+
+% Bayesian neural network bridges probabilistics programming and deep learning by introduce a method to estimate the uncertainty associated to model predictions. It introduces uncertainty to deep learning models using Bayesian inference.  such anomaly detection, optimal resource allocation, budget planning.
+
+Deep learning models are prone to overfitting and overly confident about their predictions. This is problematic for many real-world applications where uncertainty is an important factor -- a slight discrepancy can lead to costly consequences. Stochastic neural networks using Bayesian statistics have been proposed to mitigate the risk as Bayesian statistics offers a formalism to understand and quantify the uncertainty associated with deep neural network predictions. \\
+
+Reliable uncertainty estimation is critical to risk assessment and decision making. Uncertainty estimation is often used for nomaly detection, optimal resource allocation and budget planning. This is particularly important in fields such as self driving cars, medical diagnostics, healthcare, trading and finance, physics applications and more. Good uncertainty estimates quantify when the model's prediction can be trusted. Therefore, it helps us to make more informed decision, mitigate risks, reduce cost and even save lives. 
+
+% For example, a flaw in anomaly detection in medical diagnostic can results in medical misdiagnosis. A blunder in stock price prediction can be financially costly. An error in distance sensing can cause car accidents in self driving cars. Good uncertainty estimates quantify when we can trust the model's prediction. Therefore, it helps us to make more informed decision, mitigate risks, reduce cost and even save lives. 
+
+% Where do you think it's going to be used, i.e., application area?
+% Bayesian neural network allows the model out to have a probabilistic distribution instead of a point estimate. 
+\bigskip
+\section{Literature review}
+% \begin{thebibliography}{9}
+% \bibitem{jospin} 
+\begin{enumerate}
+
+	\item Jospin, Laurent Valentin, et al. "Hands-on Bayesian Neural Networks--a Tutorial for Deep Learning Users." arXiv preprint arXiv:2007.06823 (2020). \\
+
+% \bibitem{parikh}
+	\item Parikh, Jehill. “Bayesian Neural Networks: LSTM.” Medium, Towards Data Science, 1 Sept. 2019, towardsdatascience.com/bayesian-neural-networks-lstm-3616327e8b7c. \\
+
+	\item BryanB. “CAC40 Stocks Dataset.” Kaggle, 24 Mar. 2021, www.kaggle.com/bryanb/cac40-stocks-dataset. \\
+
+% \bibitem{blundell}
+	\item Blundell, Charles, et al. "Weight uncertainty in neural network." International Conference on Machine Learning. PMLR, 2015. \\
+
+% \bibitem{wiecki}
+	\item Wiecki, Thomas. “While My MCMC Gently Samples.” While My MCMC Gently Samples Atom, twiecki.io/blog/2016/06/01/bayesian-deep-learning/ \\
+
+	\item “Uncertainty Estimation for Neural Network - Dropout as Bayesian Approximation.” Medium, Towards Data Science, 2 Feb. 2019, towardsdatascience.com/uncertainty-estimation-for-neural-network-dropout-as-bayesian-approximation-7d30fc7bc1f2\#5188. 
+
+
+\end{enumerate}
+% \end{thebibliography}
+
+
+% \section{Literature review}
+% What reading will you examine to provide context and background? Please put citations of the article/blog posts with full citations
+
+% - Deep ensemble
+% - MCDropout: estimate uncertainty with minimal changes in most existing networks 
+\vfill
+\pagebreak 
+\section{Dataset}
+% What data will you use? If you are collecting new data, how will you do it?
+The dataset that will be used is the CAC40 [3], is a benchmark French stock market index for funds investing in the French stock market. 
+% Dataset can be obtained from \url{https://www.kaggle.com/bryanb/cac40-stocks-dataset}
+% \vfill
+\bigskip
+\section{Proposed method}
+
+I will be using Bayesian neural network for my project. For the Bayesian inference part, I may try one or more of the following methods: \\
+
+\begin{itemize} 
+\item Bayes by Backprop [4] 
+\item Auto Differentiation Variational Inference (ADVI) [5] 
+\item Monte Carlo Dropout [6] \\
+\end{itemize}
+
+For the neural network model part, I will be focusing on LSTM network. \\
+
+% Possible loss functions to use: \\
+
+% \begin{itemize}
+% 	\item Mean Squared Error (MSE) or Root Mean Square Error (RMSE)
+% 	\item Mean Absolute Error (MAE) 
+% 	\item Huber Loss or Pseudo Huber Loss
+% \end{itemize}
+
+
+% What method or algorithm are you proposing? If there are existing implementations, will you use them and how? How do you plan to improve or modify such implementations? You don't have to have an exact answer at this point, but you should have a general sense of how you will approach the problem you are working on.
+\bigskip
+\section{Evaluation}
+% How will you evaluate your results? Qualitatively, what kind of results do you expect (e.g. plots or figures)? Quantitatively, what kind of analysis will you use to evaluate and/or compare your results (e.g. what performance metrics or statistical tests)?
+
+
+Since the model will output a distribution of possible outcomes, the mean and standard deviation of the outcome distribution will be treated as predicted outcome and its uncertainty, respectively. \\
+
+Possible metrics to evaluate the performance of the model:\\
+
+\begin{itemize}
+	\item Mean Squared Error (MSE) 
+	\item Root Mean Square Error (RMSE)
+	\item Mean Absolute Error (MAE) \\
+	% \item Huber Loss or Pseudo Huber Loss
+\end{itemize}
+
+
+Visualizations of the model outcomes:\\
+
+\begin{itemize}
+	\item A plot of ground truth and predicted outcome with uncertainties 
+	\item Loss vs epoch plot 
+	\item Comparison of computational runtime for different Bayesian inference methods
+
+\end{itemize}
+
+
+\end{document}
